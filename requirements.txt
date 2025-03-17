@@ -1,5 +1,13 @@
+## install with pip
 pypdf
 langchain
 chromadb # Vector storage
 pytest
 boto3
+unstructuctured[all-docs]
+langchain-unstructuctured[local]
+fitz
+nltk
+
+## install with python -m
+nltk.downloader all
