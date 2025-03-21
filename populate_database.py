@@ -90,10 +90,13 @@ def buildChromadb(documentPath, chromaPath, embeddings):
     currentItems = db.get(include=[])  # IDs are always included by default
     currentItemIds = set(currentItems["ids"])
     print(f"--> Number of existing documents in DB: {len(currentItemIds)}")
-
+    
     # Get list of files in the directory & iterate through each file in the list
-    for file in filesList(documentPath):
-        print(f"--> Currently loading file: {file}")
+    files = filesList(documentPath)
+    i = 1
+    totalFileCount = len(files)
+    for file in files:
+        print(f"--> Currently loading file: [{i} / {totalFileCount}] - {file}")
         chunks = fileLoad(file)
         chunksWithId = calculate_chunk_ids(chunks)
         
@@ -104,12 +107,14 @@ def buildChromadb(documentPath, chromaPath, embeddings):
                 new_chunks.append(chunk)
                 
         if len(new_chunks):
-            print(f"--> Adding {len(new_chunks)} new chunks from {file}")
+            print(f"--> Adding {len(new_chunks)} new chunks from: [{i} / {totalFileCount}] - {file}")
             new_chunk_ids = [chunk.metadata["id"] for chunk in new_chunks]
             db.add_documents(filter_complex_metadata(new_chunks), ids=new_chunk_ids)
-            print(f"--> Done adding chunks from {file}")
+            print(f"--> Done adding chunks from: [{i} / {totalFileCount}] - {file}")
         else:
-            print(f"--> No new chunks to add from {file}")
+            print(f"--> No new chunks to add from: [{i} / {totalFileCount}] - {file}")
+
+        i+= 1
     
     print(f"--> Done adding documents from {documentPath}")
 
