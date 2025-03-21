@@ -23,4 +23,4 @@ Machine B (ollama server)
 - OS: Win10
 
 ## Notes
-For larger document sets (encoding runs thats take over 30 hrs) I have seen ollama hang / time out and python on the host ignore this and contiune waiting. To avoid this use smaller document sets or split document sets in to batches and run as an update. 
+For larger document sets I have seen ollama logs report aborting of encoding due to client closing the connection and the python client on the host ignore this and contiune waiting. This was causing encoding jobs to fail, but I could not trace what was causing the failure. To avoid this I setup the chunking and encoding cycle to run each document before moving to the next document so that failures should only impact the encoding of one document and not the entire batch. Some batches have failed at 19 hrs and others at 30+ hrs. This should also mitigate impacts of unplanned reboots from automatic updates on the windows machine as well. 
