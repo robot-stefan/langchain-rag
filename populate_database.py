@@ -7,8 +7,7 @@ from langchain_unstructured import UnstructuredLoader
 from langchain_community.vectorstores.utils import filter_complex_metadata
 from langchain_ollama import OllamaLLM
 
-from config import chromaPath, documentPath, embeddings 
-
+from config import chromaPath, documentPath, embeddings, embeddingsDB 
 
 def main():
 
@@ -24,23 +23,17 @@ def main():
 
     elif args.add:
         print("--> Adding Documents to Database")
-        buildChromadb(documentPath, chromaPath, embeddings)
+        buildChromadb(documentPath, chromaPath, embeddings, embeddingsDB)
         print("--> Adding Documents Complete !!!")
 
-
-
-
-## Load directory of documents & conduct chunking
-# need to add for files list to only have new files
 def filesList(documentPath):
+    # Create list of files in directory
     filesList = os.listdir(documentPath)
-    # for a in filesList:
-    #     if a == 
     return [documentPath + "/" + x  for x in filesList]
 
-def filesLoad(documentPath):
+def fileLoad(file):
     loader = UnstructuredLoader(
-        file_path=filesList(documentPath),
+        file_path=filesList(file),
         strategy="hi_res",
         mode="elements",
         add_start_index=True,
@@ -85,37 +78,40 @@ def wipeDatabase():
         shutil.rmtree(chromaPath)
 
 def buildChromadb(documentPath, chromaPath, embeddings):
-    ## Function to build Chromadb. It checks for existing documents 
-    # and old adds news ones.
-    # Set and load db
+    ## Add each file one by one to allow for partial success of large file batches in the event of an error. 
+
+    # Set database info
     db = Chroma(
         persist_directory=chromaPath,
         embedding_function=embeddings,
     )
 
-    # Get chunks & Ids 
-    chunks = filesLoad(documentPath)
-    chunksWithId = calculate_chunk_ids(chunks)
-    
-    # Get existing items db
+    # Get list of items from database
     currentItems = db.get(include=[])  # IDs are always included by default
     currentItemIds = set(currentItems["ids"])
     print(f"--> Number of existing documents in DB: {len(currentItemIds)}")
 
-    # Add new items 
-    new_chunks = []
-    for chunk in chunksWithId:
-        if chunk.metadata["id"] not in currentItemIds:
-            new_chunks.append(chunk)
-
-    if len(new_chunks):
-        print(f"--> Adding new documents: {len(new_chunks)}")
-        new_chunk_ids = [chunk.metadata["id"] for chunk in new_chunks]
-        db.add_documents(filter_complex_metadata(new_chunks), ids=new_chunk_ids)
-        print("--> Building chromadb complete!")
-        # db.persist()
-    else:
-        print("--> No new documents to add")
+    # Get list of files in the directory & iterate through each file in the list
+    for file in filesList(documentPath):
+        print(f"--> Currently loading file: {file}")
+        chunks = fileLoad(file)
+        chunksWithId = calculate_chunk_ids(chunks)
+        
+        # Build list of new chunks not in database 
+        new_chunks = []
+        for chunk in chunksWithId:
+            if chunk.metadata["id"] not in currentItemIds:
+                new_chunks.append(chunk)
+                
+        if len(new_chunks):
+            print(f"--> Adding {len(new_chunks)} new chunks from {file}")
+            new_chunk_ids = [chunk.metadata["id"] for chunk in new_chunks]
+            db.add_documents(filter_complex_metadata(new_chunks), ids=new_chunk_ids)
+            print(f"--> Done adding chunks from {file}")
+        else:
+            print(f"--> No new chunks to add from {file}")
+    
+    print(f"--> Done adding documents from {documentPath}")
 
 if __name__ == "__main__":
     main()
