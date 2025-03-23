@@ -1,5 +1,6 @@
 ## install with pip
 pypdf
+argparse
 langchain
 chromadb # Vector storage
 pytest
