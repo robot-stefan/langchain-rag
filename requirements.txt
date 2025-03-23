@@ -7,6 +7,8 @@ pytest
 boto3
 unstructuctured[all-docs]
 langchain-unstructuctured[local]
+langgraph
+langsmith
 fitz
 nltk
 
