@@ -26,6 +26,22 @@ Machine A (software dev + host)
 Machine B (ollama server)
 - Hardware: CPU=Xeon W3690, GPU=GTX 1060 6GB, RAM=48GB
 - OS: Win10
+## Workflow
+#### Chunking & Encoding
+```mermaid
+flowchart TD
+    A(Document) --> B(Unstructured - Chunking)
+    B --> C(Ollama - Encoding)
+    C --> D(Chroma - Storage) 
+    D --> |Next Document| A
+```
+#### Prompt Response Generation
+```mermaid
+flowchart TD
+    A(Prompt) --> B(Chroma Search)
+    B --> C(Ollama - LLM )
+    C --> D(Response)
+```
 
 ## Notes
 #### Documet Batching
