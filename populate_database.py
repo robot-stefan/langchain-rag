@@ -7,7 +7,7 @@ from langchain_unstructured import UnstructuredLoader
 from langchain_community.vectorstores.utils import filter_complex_metadata
 from langchain_ollama import OllamaLLM
 
-from config import chromaPath, documentPath, embeddings, embeddingsDB 
+from config import chromaPath, documentPath, embeddings 
 
 def main():
 
@@ -17,13 +17,13 @@ def main():
     parser.add_argument("--add", action="store_true", help="Build the database.")
     args = parser.parse_args()
     if args.reset:
-        print("--> Wipeing Database")
+        print(f"--> Wiping database in {chromaPath}")
         wipeDatabase()
         print("--> Wipe Complete !!!")
 
     elif args.add:
-        print("--> Adding Documents to Database")
-        buildChromadb(documentPath, chromaPath, embeddings, embeddingsDB)
+        print(f"--> Adding Documents to database in {chromaPath} ")
+        buildChromadb(documentPath, chromaPath, embeddings)
         print("--> Adding Documents Complete !!!")
 
 def filesList(documentPath):
