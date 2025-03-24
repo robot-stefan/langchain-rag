@@ -39,6 +39,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     A(Prompt) --> B(Chroma Search)
+    A --> C
     B --> C(Ollama - LLM )
     C --> D(Response)
 ```
