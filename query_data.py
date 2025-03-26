@@ -4,8 +4,7 @@ from langchain_chroma import Chroma
 from langchain.prompts import ChatPromptTemplate
 from langchain_ollama import OllamaLLM
 
-from config import queryModel, chromaPath, ollamaServer, embeddings
-
+from config import queryModel, chromaPath, ollamaServer, embeddings, queryTemperature, queryContextNumber, querySimilarityScore
 
 PROMPT_TEMPLATE = """
 Answer the question based only on the following context:
@@ -32,15 +31,16 @@ def query_rag(query_text: str):
     db = Chroma(persist_directory=chromaPath, embedding_function=embeddings)
 
     # Search the DB.
-    results = db.similarity_search_with_score(query_text, k=15)
+    results = db.similarity_search_with_score(query_text, k=querySimilarityScore) # org k=5
 
+    # Add results to prompt for context
     context_text = "\n\n---\n\n".join([doc.page_content for doc, _score in results])
     prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
     prompt = prompt_template.format(context=context_text, question=query_text)
     # print(prompt)
 
     # Set LLM used for the query
-    model = OllamaLLM(base_url=ollamaServer, model=queryModel, num_ctx="1500", temperature=0)
+    model = OllamaLLM(base_url=ollamaServer, model=queryModel, num_ctx=queryContextNumber, temperature=queryTemperature)
 
     response_text = model.invoke(prompt)
 
