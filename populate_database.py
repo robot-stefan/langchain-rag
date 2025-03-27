@@ -25,7 +25,7 @@ def main():
 
     if args.reset:
         print("--> Wipeing Database")
-        wipeDatabase()
+        wipeDatabase(args.chroma_folder)
         print("--> Wipe Complete !!!")
 
     elif args.add_ollama:
@@ -88,7 +88,7 @@ def calculate_chunk_ids(chunks):
 
     return chunks
 
-def wipeDatabase():
+def wipeDatabase(chromaPath):
     if os.path.exists(chromaPath):
         shutil.rmtree(chromaPath)
 
