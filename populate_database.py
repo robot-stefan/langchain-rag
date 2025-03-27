@@ -129,7 +129,7 @@ def buildChromadb(documentPath, chromaPath, embeddings):
         else:
             print(f"--> No new chunks to add from: [{currentFileCounter} / {totalFileCount}] - {file}")
 
-        i+= 1
+        currentFileCounter+= 1
     
     print(f"--> Done adding documents from {documentPath}")
 
