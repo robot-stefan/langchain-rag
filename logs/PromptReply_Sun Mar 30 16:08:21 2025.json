@@ -1,0 +1,23 @@
+{
+ "response": "RESPONSE TEXT",
+ "refrence": {
+  "prompt": "PROMPT WITH OUT CHUNKS",
+  "context": "CHUNKS",
+  "source": [
+   "file1.pdf:pg.10:0",
+   "file2:pg.3:2",
+  ]
+ },
+ "settings": {
+  "similarity_score": 15,
+  "temperature": 0.35,
+  "model": "mistral-large-latest",
+  "embeddings": "mistral-embed",
+  "database": "data/01-data-chroma"
+ },
+ "metrics": {
+  "source_count": 15,
+  "time-utc": "Sun Mar 30 20:08:21 2025",
+  "time-local": "Sun Mar 30 16:08:21 2025"
+ }
+}
