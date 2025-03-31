@@ -8,18 +8,22 @@ from langchain_community.vectorstores.utils import filter_complex_metadata
 from langchain_community.document_loaders.parsers import LLMImageBlobParser
 from langchain_ollama import OllamaLLM
 
-from config import chromaPath, documentPath, embeddings 
-# from configCloud import embeddingsCloudMistral # Comment out to disable clould option
+from config import configSetting
 
 def main():
 
     # Check if the database should be reset/cleared/wipe (using the --reset flag).
     parser = argparse.ArgumentParser()
-    parser.add_argument("--reset", action="store_true", help="Reset the database.")
-    parser.add_argument("--add_ollama", action="store_true", help="Build the database using ollama.")
-    parser.add_argument("--add_mistral", action="store_true", help="Build the database using mistral cloud.")
-    parser.add_argument("--docs_folder", action="store", type=str, default=documentPath, help="Folder where documents are located.")
-    parser.add_argument("--chroma_folder", action="store", type=str, default=chromaPath, help="Folder where chromadb is located.")
+    parser.add_argument("--reset", action="store_true", 
+                        help="Reset the database.")
+    parser.add_argument("--add_ollama", action="store_true", 
+                        help="Build the database using ollama.")
+    parser.add_argument("--add_mistral", action="store_true", 
+                        help="Build the database using mistral cloud.")
+    parser.add_argument("--docs_folder", action="store", type=str, default=configSetting.documentPath, 
+                        help="Folder where documents are located.")
+    parser.add_argument("--chroma_folder", action="store", type=str, default=configSetting.chromaPath, 
+                        help="Folder where chromadb is located.")
 
     args = parser.parse_args()
 
@@ -30,14 +34,15 @@ def main():
 
     elif args.add_ollama:
         print("--> Adding Documents to Database")
-        buildChromadb(args.docs_folder, args.chroma_folder, embeddings)
+        buildChromadb(args.docs_folder, args.chroma_folder, configSetting.embeddings)
         print("--> Adding Documents Complete !!!")
     
     # Comment out below elif to disable cloud option
-    # elif args.add_mistral:
-    #     print("--> Adding Documents to Database")
-    #     buildChromadb(args.docs_folder, args.chroma_folder, embeddingsCloudMistral)
-    #     print("--> Adding Documents Complete !!!")
+    elif args.add_mistral:
+        from configCloud import configCloudSetting # Comment out to disable clould option
+        print("--> Adding Documents to Database")
+        buildChromadb(args.docs_folder, args.chroma_folder, configCloudSetting.embeddingsCloudMistral)
+        print("--> Adding Documents Complete !!!")
 
 
 def filesList(documentPath):
@@ -54,7 +59,9 @@ def fileLoad(file):
         chunking_strategy="by_title",
         max_characters=1500,
         multipage_sections=True,
-        show_progress_bar=True,
+        # show_progress_bar=True,
+        # infer_table_structure=True,
+        hi_res_model_name="yolox"
     )
 
     return loader.load()
@@ -89,15 +96,18 @@ def calculate_chunk_ids(chunks):
     return chunks
 
 def wipeDatabase(chromaPath):
-    if os.path.exists(chromaPath):
-        shutil.rmtree(chromaPath)
+    chromaFolder = f"{configSetting.topPath}/{chromaPath}"
+    if os.path.exists(chromaFolder):
+        shutil.rmtree(chromaFolder)
 
 def buildChromadb(documentPath, chromaPath, embeddings):
     ## Add each file one by one to allow for partial success of large file batches in the event of an error. 
+    docsFolder = f"{configSetting.topPath}/{documentPath}"
+    chromaFolder = f"{configSetting.topPath}/{chromaPath}"
 
     # Set database info
     db = Chroma(
-        persist_directory=chromaPath,
+        persist_directory=chromaFolder,
         embedding_function=embeddings,
     )
 
@@ -107,7 +117,7 @@ def buildChromadb(documentPath, chromaPath, embeddings):
     print(f"--> Number of existing items in DB: {len(currentItemIds)}")
     
     # Get list of files in the directory & iterate through each file in the list
-    files = filesList(documentPath)
+    files = filesList(docsFolder)
     currentFileCounter = 1
     totalFileCount = len(files)
     for file in files:
@@ -131,7 +141,7 @@ def buildChromadb(documentPath, chromaPath, embeddings):
 
         currentFileCounter+= 1
     
-    print(f"--> Done adding documents from {documentPath}")
+    print(f"--> Done adding documents from {docsFolder}")
 
 
 if __name__ == "__main__":

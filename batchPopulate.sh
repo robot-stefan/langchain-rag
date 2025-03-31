@@ -6,8 +6,11 @@
 echo "Starting shell script!"
 
 source .venv/bin/activate
-python populate_database.py --docs_folder test-data-docs1 --chroma_folder test-data-chroma1 --add_ollama
-python populate_database.py --docs_folder test-data-docs2 --chroma_folder test-data-chroma2 --add_ollama
-python populate_database.py --docs_folder test-data-docs3 --chroma_folder test-data-chroma3 --add_ollama
+
+# Add with local ollama by using --add_ollama
+python populate_database.py --docs_folder 01-data-docs --chroma_folder 01-data-chroma --add_ollama
+
+# Add with cloud provider mistral.al by using --add_mistral
+python populate_database.py --docs_folder 02-data-docs --chroma_folder 02-data-chroma --add_mistral
 
 echo "Shell script END!"

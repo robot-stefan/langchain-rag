@@ -6,6 +6,7 @@ chromadb # Vector storage
 pytest
 boto3
 unstructuctured[all-docs]
+unstructured-ingest
 langchain-unstructuctured[local]
 langgraph
 langsmith
