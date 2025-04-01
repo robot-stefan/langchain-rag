@@ -1,17 +1,19 @@
 ## install system packages
-apt install cmake poppler-utils
+apt install cmake poppler-utils buiild-essential tesseract-ocr libtesseract-dev protobuf-compiler
+
 
 ## install with pip
 pypdf
 argparse
 chromadb # Vector storage
+numpy==1.26.4
 pytest
 boto3
 torch
 torchvision
 torchaudio
 python-poppler
-unstructuctured[all-docs]
+unstructured[all-docs]
 unstructured-ingest
 langchain
 langchain-chroma
@@ -23,7 +25,8 @@ langgraph
 langsmith
 fitz
 tesseract
-onnxsim
+onnx
+onnxruntime
 yolox
 nltk
 
