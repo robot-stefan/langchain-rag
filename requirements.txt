@@ -1,18 +1,25 @@
+## install system packages
+apt install cmake poppler-utils
+
 ## install with pip
 pypdf
 argparse
-langchain
 chromadb # Vector storage
 pytest
 boto3
+python-poppler
 unstructuctured[all-docs]
 unstructured-ingest
-langchain-unstructuctured[local]
+langchain
+langchain-chroma
+langchain-community
+langchain-ollama
+langchain-unstructured[local]
+langchain-mistralai #optional for using cloud function
 langgraph
 langsmith
 fitz
 nltk
-langchain-mistralai #optional for using cloud function
 
 ## install with python -m
 nltk.downloader all
