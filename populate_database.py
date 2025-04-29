@@ -48,7 +48,7 @@ def main():
 def filesList(documentPath):
     # Create list of files in directory
     filesList = os.listdir(documentPath) 
-    return [documentPath + "/" + x  for x in filesList]
+    return [documentPath + "/" + x  for x in filesList if os.path.isfile(os.path.join(documentPath, x))]
 
 def fileLoad(file):
     loader = UnstructuredLoader(
