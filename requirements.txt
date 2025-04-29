@@ -1,5 +1,5 @@
 ## install system packages
-apt install cmake poppler-utils buiild-essential tesseract-ocr libtesseract-dev protobuf-compiler
+# apt install cmake poppler-utils buiild-essential tesseract-ocr libtesseract-dev protobuf-compiler
 
 
 ## install with pip
@@ -23,6 +23,9 @@ langchain-unstructured[local]
 langchain-mistralai #optional for using cloud function
 langgraph
 langsmith
+mistralai
+backoff
+natsort
 fitz
 tesseract
 onnx
@@ -31,4 +34,4 @@ yolox
 nltk
 
 ## install with python -m
-nltk.downloader all
+# nltk.downloader all
