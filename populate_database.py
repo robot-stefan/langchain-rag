@@ -46,8 +46,9 @@ def main():
 
 
 def filesList(documentPath):
-    # Create list of files in directory
-    filesList = os.listdir(documentPath) 
+    # Create list of files in directory and sorts them abc
+    filesList = os.listdir(documentPath)
+    fileList.sort()
     return [documentPath + "/" + x  for x in filesList if os.path.isfile(os.path.join(documentPath, x))]
 
 def fileLoad(file):
