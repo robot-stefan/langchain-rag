@@ -1,5 +1,5 @@
+import json, os, re, time, backoff, argparse, requests, base64, pymupdf
 from pypdf import PdfReader, PdfWriter 
-import pymupdf
 from pathlib import Path
 from mistralai import Mistral, DocumentURLChunk, ImageURLChunk, TextChunk
 from mistralai.models import OCRResponse
@@ -9,9 +9,6 @@ from file_operations import filesList, fileMoveToAdded
 
 from langchain_unstructured import UnstructuredLoader
 from unstructured.partition.pdf import partition_pdf
-
-
-import json, os, re, time, backoff, argparse, requests, base64
 
 def main():
     """
