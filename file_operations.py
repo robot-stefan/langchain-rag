@@ -25,18 +25,3 @@ def fileMoveToAdded(file):
     else: 
         os.mkdir(fileMoveFolder)
         os.rename(file, fileMoveFullName)
-
-
-
-
-# addedFolder = "/_added/"
-# file = "data/parts-data-local-test-3/2023_Raybestos_Brake_Catalog-output-0.pdf"
-# directoryName = os.path.dirname(file)
-# fileName = os.path.basename(file)
-# fileMoveLocation = directoryName+addedFolder+fileName
-# print(fileMoveLocation)
-# fileMoveFolder = directoryName+addedFolder
-# print(fileMoveFolder)
-# b = os.path.isdir(fileMoveFolder)
-# os.mkdir(fileMoveFolder)
-# print(b)
