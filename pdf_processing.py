@@ -1,18 +1,23 @@
-from pypdf import PdfReader, PdfWriter
+from pypdf import PdfReader, PdfWriter 
+import pymupdf
 from pathlib import Path
 from mistralai import Mistral, DocumentURLChunk, ImageURLChunk, TextChunk
 from mistralai.models import OCRResponse
 from config import configSetting
-from configCloud import MISTRALAI_API_KEY
-from populate_database import filesList
+from configCloud import MISTRALAI_API_KEY, UNSTRUCTURED_API_KEY
+from file_operations import filesList, fileMoveToAdded
 
-import json, os, re, time, backoff, argparse
+from langchain_unstructured import UnstructuredLoader
+from unstructured.partition.pdf import partition_pdf
+
+
+import json, os, re, time, backoff, argparse, requests, base64
 
 def main():
     """
-    Pdf processing is for splitting up large pdfs for use with cloud OCR tools such as those provided by mistral. Some code in this has been taken from mistrals ocr demo notebook. Cloud OCR tool will generate a json and md file of the pdf. 
+    Pdf processing is for splitting up large pdfs for use with cloud OCR tools such as those provided by mistral. 
     """
-  
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--pdf_split", action="store_true", 
                         help="Only run pdf splitting operations.")
@@ -59,6 +64,9 @@ def breakdownPdf(file, pageLimit, directory):
                     writer = PdfWriter()
             page+=1
 
+def sort_key(s: str) -> list:
+    return [int(p)for p in re.findall(r'\D+|\d+', s) if p.isdigit()]
+
 def replace_images_in_markdown(markdown_str: str, images_dict: dict) -> str:
     """
     Replace image placeholders in markdown with base64-encoded images.
@@ -90,20 +98,88 @@ def get_combined_markdown(ocr_response: OCRResponse) -> str:
     # Extract images from page
     for page in ocr_response.pages:
         image_data = {}
-        for img in page.images:
-            image_data[img.id] = img.image_base64
+        # for img in page.images:
+            # image_data[img.id] = img.image_base64
         # Replace image placeholders with actual images
-        markdowns.append(replace_images_in_markdown(page.markdown, image_data))
+        # markdowns.append(replace_images_in_markdown(page.markdown, image_data))
+        markdowns.append(page.markdown)
 
     return "\n\n".join(markdowns)
 
-def mistralPdfOcr(pdf_file_path):
+def get_text_markdown(ocr_response: OCRResponse) -> str:
+    """
+    Combine OCR text and images into a single markdown document.
+
+    Args:
+        ocr_response: Response from OCR processing containing text and images
+
+    Returns:
+        Combined markdown string with embedded images
+    """
+    markdowns: list[str] = []
+    for page in ocr_response.pages:
+        markdowns.append(page.markdown)
+
+    return "\n\n".join(markdowns)
+
+def mistralImgFromPdfOcr(pdf_file_path):
+
+    client = Mistral(api_key=MISTRALAI_API_KEY)
+    fileNoExt = os.path.splitext(pdf_file_path)[0]
+    pdf_file = Path(pdf_file_path)
+
+    # Verify PDF file exists
+    assert pdf_file.is_file()
+
+    # Open the PDF file
+    pdf_document = pymupdf.open(pdf_file)
+    text = ""
+    json_dict: json = []
+
+    # Iterate through each page
+    for page_num in range(len(pdf_document)):
+        page = pdf_document.load_page(page_num)
+        pix = page.get_pixmap()
+        img = pix.tobytes(output='jpg', jpg_quality=100)
+
+        # Encode image as base64 for API
+        encoded = base64.b64encode(img).decode()
+        base64_data_url = f"data:image/jpeg;base64,{encoded}"
+
+        # Perform OCR on the image
+        img_response = client.ocr.process(
+            document=ImageURLChunk(image_url=base64_data_url),
+            model="mistral-ocr-latest",
+            retries = 30,
+            timeout_ms = 600000,
+            )
+        
+        markdowns: list[str] = []
+        pages = img_response.pages
+        for page in pages:
+            markdowns.append(page.markdown)
+
+        text += img_response.pages[0].markdown
+        response_json_dict = json.loads(img_response.model_dump_json())
+        json_dict.append(response_json_dict)
+        time.sleep(60)
+        
+    response_json_object = json.dumps(response_json_dict, indent=4)
+    with open("{}.json".format(fileNoExt), 'w') as outfile:
+        json.dump(response_json_object, outfile)
+
+    markdown_text = text
+
+    # Convert Response to markdown
+    with open("{}.md".format(fileNoExt), 'w') as outfile:
+        outfile.write(markdown_text)
+
+def mistralPdfOcr(pdf_file_path, include_images):
     """
     Sends one pdf to Mistral cloud OCR model. 
     """
 
     client = Mistral(api_key=MISTRALAI_API_KEY)
-
     fileNoExt = os.path.splitext(pdf_file_path)[0]
     pdf_file = Path(pdf_file_path)
 
@@ -126,23 +202,38 @@ def mistralPdfOcr(pdf_file_path):
     pdf_response = client.ocr.process(
         document=DocumentURLChunk(document_url=signed_url.url),
         model="mistral-ocr-latest",
-        include_image_base64=True,
+        include_image_base64=include_images,
         retries = 30,
-        timeout_ms = 600000
+        timeout_ms = 600000,
+
     )
 
-    # Convert response to JSON
-    response_json_dict = json.loads(pdf_response.model_dump_json())
-    response_json_object = json.dumps(response_json_dict, indent=4)
-    with open("{}.json".format(fileNoExt), 'w') as outfile:
-        json.dump(response_json_object, outfile)
+    if include_images == True:
+        # Convert response to JSON
+        response_json_dict = json.loads(pdf_response.model_dump_json())
+        response_json_object = json.dumps(response_json_dict, indent=4)
+        with open("{}.json".format(fileNoExt), 'w') as outfile:
+            json.dump(response_json_object, outfile)
 
-    # Convert Response to markdown
-    response_markdown = get_combined_markdown(pdf_response)
-    with open("{}.md".format(fileNoExt), 'w') as outfile:
-        outfile.write(response_markdown)
-    
-    # return [response_json_object, response_markdown]
+        # Convert Response to markdown
+        response_markdown = get_combined_markdown(pdf_response)
+        with open("{}.md".format(fileNoExt), 'w') as outfile:
+            outfile.write(response_markdown)
+
+    elif include_images == False:
+        response_markdown = get_text_markdown(pdf_response)
+        with open("{}.md".format(fileNoExt), 'w') as outfile:
+            outfile.write(response_markdown)
+
+@backoff.on_exception(backoff.expo, requests.exceptions.RequestException, max_tries=5, jitter=True)
+def mistralPdfOcr_Retry(pdf_file_path):
+    """
+    Process OCR with retry and backoff
+    """
+    try:
+        return mistralPdfOcr(pdf_file_path)
+    except Exception as e:
+        raise e #Reraise exception after
 
 def processMistralPdfOcr(directory):
     """
@@ -156,9 +247,9 @@ def processMistralPdfOcr(directory):
     for file in split_file_list:
         # print(file)
         print(f"--> OCR processing: [{currentFileCounter} / {totalFileCount}] - {file}")
-        mistralPdfOcr(file)
+        mistralPdfOcr_Retry(file)
         currentFileCounter+= 1
-        time.sleep(45)
+        time.sleep(60)
     print("--> Cloud OCR processing done!!")
 
 def breakdownPdfs(directory):
