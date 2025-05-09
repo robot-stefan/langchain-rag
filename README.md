@@ -5,14 +5,23 @@ This is a forked and updated version of [pixegami's rag tutorial v2](https://git
 It features the following highlights:
 - Local same machine or local network [Ollama](https://ollama.com/) server for running models (encoding & prompt)
 - Uses [unsturctured](https://unstructured.io/) from [langchain](https://python.langchain.com/docs/integrations/document_loaders/unstructured_file/) to load documents which will run a model locally on the machine to conduct chunking.
-- One file 'config.py' to house configuration settings (model selections, server info, etc)
+- A local config file 'config.py' and a cloud config file 'configCloud.py' to house configuration settings (model selections, server info, etc)
 - Supports langchain v0.3
 - Uses [chromadb](https://www.trychroma.com/) for vector store
 - By using unstructured more document formats than pdf are supported and chunking the documents can be done following sections vs based pages or text blocks.
+- A full in the cloud option for running on low resource machines.
+- Flags for running from terminal and bash scripts to support batching jobs and testing.
+- Output logging of prompt responses in both markdown (basic reply) and json (extended information).
 
 ## Setup
 #### Software Configuration
-See requirements.txt for a list of python packages. This has been running with python 3.10.12 in a venv on the host machine. Once python packages are installed you will need to run the following:
+See requirements.txt for a list of python packages. This has been running with python 3.10.12 in a venv on the host machine. The yolox package seems to be getting installed with unstructured and installing with pip causes errors. Breakup the requirements.txt list doing it all at once can fail due to dependency depth issues.  
+
+Before python packages are installed run:
+
+```apt install cmake poppler-utils build-essential tesseract-ocr libtesseract-dev protobuf-compiler libpoppler-cpp-dev```
+
+Once python packages are installed you will need to run the following:
 
 ```python -m nltk.downloader all```
 #### Equipment
