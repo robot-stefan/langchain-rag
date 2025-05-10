@@ -2,7 +2,13 @@
 # apt install cmake poppler-utils build-essential tesseract-ocr libtesseract-dev protobuf-compiler libpoppler-cpp-dev
 
 ## install with pip
-pypdf
+pdf2image==1.17.0
+pdfminer.six==20231228
+pdfplumber==0.11.5
+pikepdf==9.5.2
+pillow==11.1.0
+PyMuPDF==1.25.5
+pypdf==5.4.0
 argparse
 chromadb # Vector storage
 numpy==1.26.4
@@ -12,11 +18,15 @@ tqdm
 psutil
 torch
 opencv_python
+six==1.17.0
 torchvision
 torchaudio
-python-poppler
-unstructured[all-docs]
-unstructured-ingest
+python-poppler==0.4.1
+unstructured[all-docs]==0.15.14
+unstructured-client==0.31.3
+unstructured-inference==0.7.36
+unstructured-ingest==0.7.2
+unstructured.pytesseract==0.3.15
 langchain
 langchain-chroma
 langchain-community
