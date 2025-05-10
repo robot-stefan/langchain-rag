@@ -24,17 +24,20 @@ Before python packages are installed run:
 Once python packages are installed you will need to run the following:
 
 ```python -m nltk.downloader all```
+
+If you plan to run unstructured (which uses onnx) with gpu you will need to install TensorRT (https://developer.nvidia.com/tensorrt).
+
 #### Equipment
 I have this running on two machines. This is not fast, but allows for experimentation as a personal project with on hand equipment that has other primary purposes. 
 
 Machine A (software dev + host)
 - Hardware: Lenovo m920q (CPU=i5-8500T, RAM=32GB)
 - OS: Linux Mint virtual machine on ProxMox (CPU=4 cores & RAM=24 GB)
-- Python: 3.10.12 (venv)
+- Python: 3.10.12 (venv) 
 
 Machine B (ollama server)
 - Hardware: CPU=Xeon W3690, GPU=GTX 1060 6GB, RAM=48GB
-- OS: Win10
+- OS: Win10 (also dual boot with Linux Mint & Python 3.12)
 ## Workflow
 #### Chunking & Encoding
 ```mermaid
