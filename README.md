@@ -37,7 +37,15 @@ Machine A (software dev + host)
 
 Machine B (ollama server)
 - Hardware: CPU=Xeon W3690, GPU=GTX 1060 6GB, RAM=48GB
-- OS: Win10 (also dual boot with Linux Mint & Python 3.12)
+- OS: Win10
+- Other note: I cannot get pikepdf to run in windows or atleast this is where the failure seems to be coming from and cannot presently trace why as it is failing with out error I was aiming to run this with directML and not through WSL. 
+
+Machine B (as linux host + ollama)
+- 0S: Linux Mint 22 (not 22.1)
+- Python: 3.12 (venv)
+- Graphics: nVidia driver 550 (cuda 12.5).
+- Other note: TensorRT no longer supports my gpu, but onnx will fall back to cuda and cpu after warning that TensorRT doesn't work.
+  
 ## Workflow
 #### Chunking & Encoding
 ```mermaid
