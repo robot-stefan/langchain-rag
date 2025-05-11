@@ -19,13 +19,17 @@ See requirements.txt for a list of python packages. This has been running with p
 
 Before python packages are installed run:
 
-```apt install cmake poppler-utils build-essential tesseract-ocr libtesseract-dev protobuf-compiler libpoppler-cpp-dev```
+```apt install cmake poppler-utils build-essential tesseract-ocr libtesseract-dev protobuf-compiler libpoppler-cpp-dev python-is-python3```
 
 Once python packages are installed you will need to run the following:
 
 ```python -m nltk.downloader all```
 
-If you plan to run unstructured (which uses onnx) with gpu you will need to install TensorRT (https://developer.nvidia.com/tensorrt).
+##### Cuda & TensorRT 
+If you plan to run unstructured (which uses onnx) with gpu and your card supports TensorRT you can compare onnx version to tensorrt (https://onnxruntime.ai/docs/execution-providers/TensorRT-ExecutionProvider.html) and get TensorRT (https://developer.nvidia.com/tensorrt). If your gpu doesn't support it move on to other gpu methods (for example cuda). 
+
+##### DirectML
+Currently untested due to some issue possibly with pikepdf on windows.
 
 #### Equipment
 I have this running on two machines. This is not fast, but allows for experimentation as a personal project with on hand equipment that has other primary purposes. 
